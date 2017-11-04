@@ -10,4 +10,4 @@ create_user = '''with try_insert as (INSERT INTO "User" (about, email, fullname,
                 select about, email, fullname, nickname, false from "User" 
                 where nickname = $4 or email = $2'''
 
-get_user = '''SELECT about, email fullname, nickname FROM "User" where'''
+get_user = '''SELECT about, email, fullname, nickname FROM "User" where nickname = $1'''

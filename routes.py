@@ -7,5 +7,6 @@ from views import *
 routes = [
     ('GET', '/', Test_db, 'main'),
     ('POST', '/user/{nickname}/create', UserCreate, 'create_user'),
+    ('*', '/user/{nickname}/profile', UserProfile, 'profile_user'),
     # ('*',   '/log', Login,   'signout'),
 ]
