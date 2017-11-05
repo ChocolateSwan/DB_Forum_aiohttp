@@ -39,7 +39,7 @@ async def init(app_loop):
     # await conn.close()
     # print(values[0])
     # end db connect
-    serv_generator = app_loop.create_server(handler, '127.0.0.1', 8000)
+    serv_generator = app_loop.create_server(handler, '127.0.0.1', 8080)
     return serv_generator, handler, app
 
 loop = asyncio.get_event_loop()
