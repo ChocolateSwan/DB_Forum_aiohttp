@@ -9,6 +9,3 @@ CREATE TABLE "User"
 
 CREATE UNIQUE INDEX user_nickname_unique ON "User" (nickname);
 CREATE UNIQUE INDEX user_email_unique ON "User" (email);
-
-CREATE INDEX user_nickname_btree
-ON "User" USING btree (nickname);

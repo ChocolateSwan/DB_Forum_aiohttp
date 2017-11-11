@@ -1,6 +1,6 @@
 from aiohttp.web import json_response, View
 
-from queryes.query_User import create_user, get_user, update_user, up_u, up_u_2
+from queryes.query_User import create_user, get_user, update_user, has_email
 
 
 class Test(View):
@@ -58,28 +58,21 @@ class UserProfile (View):
             async with connection.transaction():
                 # TODO добавить default в гет чтоб исключение не бросало
                 data = await  self.request.json()
-                req_update_user = ' '
-                for key in data:
-                    req_update_user += key + " = '" + str(data[key]) + "', "
-                req_update_user = req_update_user[:req_update_user.rfind(',')]
-                print (req_update_user)
-                update_u = update_user.format(req_update_user, "'"+self.request.match_info['nickname']+"'", "'"+data.get('email',' ') + "'")
-                update_u = up_u.format( "'"+data.get('email',' ') + "'" if data.get('email','') else ''
-                    # "'"+data.get('email',' ') + "'"
-                                        ) + update_u + up_u_2
-                print (update_u)
-                result = await connection.fetchrow(update_u)
-                print (result)
-                result = dict(result)
-                # {'message': 'cant find user'}
-                status = 200
-                if result['bool'] == True:
-                    status = 200
-                else:
-                    status = 409
+                email = data.get('email')
+                if email is not None:
+                    result = await connection.fetchrow(has_email, email)
+                    if result is not None:
+                        return json_response({'message': 'this email is already used'}, status=409)
 
+                result = await connection.fetchrow(update_user,
+                                                   data.get('about'),
+                                                   data.get('fullname'),
+                                                   data.get('email'),
+                                                   self.request.match_info['nickname'])
+                if result is not None:
+                    return json_response(dict(result),
+                                         status=200)
 
-
-                return json_response(result,
-                                     status=status)
+                return json_response({'message': 'cant find user'},
+                                     status=404)
 

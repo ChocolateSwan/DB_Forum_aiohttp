@@ -7,7 +7,6 @@ class ForumCreate (View):
         async with pool.acquire() as connection:
             async with connection.transaction():
                 data = await  self.request.json()
-                # TODO добавить default в гет чтоб исключение не бросало
                 result_user = await connection.fetchrow(
                     ''' select id, nickname from "User" where nickname = $1''',
                     data.get('user',' ')
@@ -43,7 +42,6 @@ class ForumDetails (View):
         pool = self.request.app['pool']
         async with pool.acquire() as connection:
             async with connection.transaction():
-                # TODO добавить default в гет чтоб исключение не бросало
                 result = await connection.fetchrow(
                     '''select posts, slug, threads, title, "user" from forum where slug = $1''',
                                                    self.request.match_info['slug'])
