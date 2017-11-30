@@ -11,4 +11,6 @@ routes = [
     ('POST', '/api/forum/create', ForumCreate, 'create_forum'),
     ('GET', '/api/forum/{slug}/details', ForumDetails, 'details_forum'),
     ('POST', '/api/forum/{slug}/create', ThreadCreate, 'create_thread'),
+    ('GET', '/api/forum/{slug}/threads', ForumThreads, 'threads_forum'),
+    ('*', '/api/thread/{slug_or_id}/details', ThreadDetails, 'details_thread')
 ]

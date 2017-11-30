@@ -4,7 +4,7 @@ from dateutil.tz import tzutc
 from datetime import datetime
 from pytz import timezone
 
-from queryes.query_Thread import create_thread
+from queryes.query_Thread import create_thread, select_threads
 
 UTC = tzutc()
 def serialize_date(dt):
@@ -14,7 +14,6 @@ def serialize_date(dt):
     return dt.isoformat() + 'Z'
 
 
-# TODO +1 в форум
 class ThreadCreate (View):
     async def post(self):
         pool = self.request.app['pool']
@@ -64,3 +63,55 @@ class ThreadCreate (View):
                 result_thread.pop('bool', False)
                 return json_response(result_thread,
                                      status=status)
+
+
+
+class ThreadDetails(View):
+    async def get(self):
+        pool = self.request.app['pool']
+        async with pool.acquire() as connection:
+            async with connection.transaction():
+                slug_or_id = self.request.match_info['slug_or_id']
+                sql_query = ''' SELECT author, created, forum, id, message, slug, title, votes
+                    FROM thread
+                    WHERE {} '''\
+                    .format(
+                    'id = {}'.format(slug_or_id) if slug_or_id.isdigit()
+                    else "slug = '{}'".format(slug_or_id)
+                )
+                result_thread = await connection.fetchrow(sql_query)
+                status = 404
+                if result_thread:
+                    status = 200
+                    result_thread = dict(result_thread)
+                    result_thread['created'] = result_thread['created'].isoformat()
+                return json_response(result_thread if status == 200 else {'message': 'thread not found'},
+                                     status=status)
+
+    async def post(self):
+        pool = self.request.app['pool']
+        async with pool.acquire() as connection:
+            async with connection.transaction():
+                slug_or_id = self.request.match_info['slug_or_id']
+                data = await  self.request.json()
+                print(data)
+                sql_str = '''
+                UPDATE thread SET message = {}, title = {} WHERE {}
+                RETURNING author, created, forum, id, message, slug, title, votes;
+                '''.format(
+                    "'" + data.get('message') + "'" if data.get('message') else 'message',
+                    "'" + data.get('title') + "'" if data.get('title') else 'title',
+                    'id = {}'.format(slug_or_id) if slug_or_id.isdigit()
+                    else "slug = '{}'".format(slug_or_id)
+                )
+                print(sql_str)
+                result_thread = await connection.fetchrow(sql_str)
+                status = 404
+                if result_thread:
+                    status = 200
+                    result_thread = dict(result_thread)
+                    result_thread['created'] = result_thread['created'].isoformat()
+                return json_response(result_thread if status == 200 else {'message': 'thread not found'},
+                                     status=status)
+
+

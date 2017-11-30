@@ -26,3 +26,12 @@ select author, created, forum, id, message, slug, title, votes, false
 from thread 
 where slug = $6
 '''
+
+
+select_threads = '''
+select (author_id,author, forum_id, forum, message, slug, title, created)
+from thread
+where created >= $
+order by creadted $
+limit 
+'''
