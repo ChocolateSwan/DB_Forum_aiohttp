@@ -3,6 +3,7 @@ import json
 from dateutil.tz import tzutc
 from datetime import datetime
 from pytz import timezone
+from functions import update_users_per_forum
 
 from queryes.query_Thread import create_thread, select_threads
 
@@ -55,6 +56,8 @@ class ThreadCreate (View):
                     data.get('title', ' '),
                     t,
                 )
+
+                await update_users_per_forum(connection,result_forum.get('id', 0), result_user.get('id', 0))
 
                 result_thread = dict(result_thread)
                 result_thread['created'] = result_thread['created'].isoformat()
